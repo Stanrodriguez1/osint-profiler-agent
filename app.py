@@ -42,7 +42,7 @@ if st.button("Start Search & Profile"):
 
                 st.info("🧠 Step 2: Web data found! Feeding into NVIDIA AI for analysis...")
 
-                # Point the client to NVIDIA's servers using your NVIDIA key
+                # SECURITY: Pulls the API key safely from your hidden Streamlit Vault
                 client = OpenAI(
                     base_url="https://integrate.api.nvidia.com/v1",
                     api_key=st.secrets["NVIDIA_API_KEY"]
@@ -66,9 +66,9 @@ if st.button("Start Search & Profile"):
                 Format the output beautifully in Markdown.
                 """
                 
-                # Using Mixtral 8x22B (Highly capable model currently hosted by NVIDIA)
+                # Using Llama 3.2 which is currently active on NVIDIA NIM
                 response = client.chat.completions.create(
-                    model="mistralai/mixtral-8x22b-instruct-v0.1",
+                    model="meta/llama-3.2-3b-instruct",
                     messages=[{"role": "user", "content": prompt}],
                     timeout=30 
                 )
