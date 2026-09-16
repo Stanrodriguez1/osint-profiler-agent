@@ -20,14 +20,22 @@ if st.button("Start Search & Profile"):
                 queries = [
                     f'"{name}" {phone if phone else ""} {email if email else ""}',
                     f'"{name}" LinkedIn OR Director OR Founder OR Business',
+                               # 1. Broadened the search queries (removed strict quotes)
+                queries = [
+                    f'{name} {phone if phone else ""} {email if email else ""}',
+                    f'{name} LinkedIn OR Business OR Director',
                 ]
                 
                 st.info("📡 Step 1: Searching the web for public records...")
                 
+                # 2. Changed to 'lite' backend which is much more reliable on cloud servers
                 ddgs = DDGS()
                 search_results = []
                 for q in queries:
-                    results = ddgs.text(q, max_results=5, backend="html")
+                    results = ddgs.text(q, max_results=5, backend="lite")
+                    if results:
+                        search_results.extend(results)
+                        results = ddgs.text(q, max_results=5, backend="html")
                     if results:
                         search_results.extend(results)
                 
