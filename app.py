@@ -16,6 +16,7 @@ if st.button("Start Search & Profile"):
     else:
         with st.spinner("Agent is running..."):
             try:
+                # Broadened queries without strict quotes
                 queries = [
                     f'{name} {phone if phone else ""} {email if email else ""}',
                     f'{name} LinkedIn OR Business OR Director'
@@ -23,6 +24,7 @@ if st.button("Start Search & Profile"):
                 
                 st.info("📡 Step 1: Searching the web for public records...")
                 
+                # Using 'lite' backend to bypass cloud IP blocks
                 ddgs = DDGS()
                 search_results = []
                 for q in queries:
@@ -40,7 +42,7 @@ if st.button("Start Search & Profile"):
 
                 st.info("🧠 Step 2: Web data found! Feeding into NVIDIA AI for analysis...")
 
-                # Point the client to NVIDIA's servers using your NVIDIA key!
+                # Point the client to NVIDIA's servers using your NVIDIA key
                 client = OpenAI(
                     base_url="https://integrate.api.nvidia.com/v1",
                     api_key=st.secrets["NVIDIA_API_KEY"]
@@ -64,9 +66,9 @@ if st.button("Start Search & Profile"):
                 Format the output beautifully in Markdown.
                 """
                 
-                # Using Llama 3.1 70B (one of the smartest open models hosted by NVIDIA)
+                # Using Mixtral 8x22B (Highly capable model currently hosted by NVIDIA)
                 response = client.chat.completions.create(
-                    model="meta/llama-3.1-70b-instruct",
+                    model="mistralai/mixtral-8x22b-instruct-v0.1",
                     messages=[{"role": "user", "content": prompt}],
                     timeout=30 
                 )
