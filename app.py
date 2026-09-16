@@ -3,7 +3,7 @@ from duckduckgo_search import DDGS
 from openai import OpenAI
 
 st.set_page_config(page_title="OSINT Profiler", page_icon="🕵️")
-st.title("🕵️ Customer OSINT Profiling Agent")
+st.title("🕵️ Customer OSINT Profiling Agent (NVIDIA)")
 st.write("Enter the details below. The AI will scour the web, cross-reference data, and build an investment profile.")
 
 name = st.text_input("Full Name (Required)")
@@ -16,7 +16,6 @@ if st.button("Start Search & Profile"):
     else:
         with st.spinner("Agent is running..."):
             try:
-                # Broadened queries without strict quotes
                 queries = [
                     f'{name} {phone if phone else ""} {email if email else ""}',
                     f'{name} LinkedIn OR Business OR Director'
@@ -24,7 +23,6 @@ if st.button("Start Search & Profile"):
                 
                 st.info("📡 Step 1: Searching the web for public records...")
                 
-                # Using 'lite' backend to bypass cloud IP blocks
                 ddgs = DDGS()
                 search_results = []
                 for q in queries:
@@ -37,13 +35,17 @@ if st.button("Start Search & Profile"):
                     formatted_results += f"Source URL: {r.get('href')}\nTitle: {r.get('title')}\nSnippet: {r.get('body')}\n\n"
                 
                 if not formatted_results:
-                    st.warning("No public data found on the web for this person. Try adding their city or company name next to their name (e.g., 'Kushal Varshney Aligarh').")
+                    st.warning("No public data found on the web for this person. Try adding their city or company name next to their name.")
                     st.stop()
 
-                st.info("🧠 Step 2: Web data found! Feeding into AI for analysis...")
+                st.info("🧠 Step 2: Web data found! Feeding into NVIDIA AI for analysis...")
 
-                # Pull API key securely from Streamlit Vault
-                client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                # Point the client to NVIDIA's servers using your NVIDIA key!
+                client = OpenAI(
+                    base_url="https://integrate.api.nvidia.com/v1",
+                    api_key=st.secrets["NVIDIA_API_KEY"]
+                )
+                
                 prompt = f"""
                 You are an expert OSINT investigator and financial profiler.
                 Target Name: {name}
@@ -62,8 +64,9 @@ if st.button("Start Search & Profile"):
                 Format the output beautifully in Markdown.
                 """
                 
+                # Using Llama 3.1 70B (one of the smartest open models hosted by NVIDIA)
                 response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="meta/llama-3.1-70b-instruct",
                     messages=[{"role": "user", "content": prompt}],
                     timeout=30 
                 )
