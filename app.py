@@ -1,9 +1,9 @@
 import streamlit as st
 from duckduckgo_search import DDGS
-from openai import OpenAI
+from google import genai
 
 st.set_page_config(page_title="OSINT Profiler", page_icon="🕵️")
-st.title("🕵️ Customer OSINT Profiling Agent (NVIDIA)")
+st.title("🕵️ Customer OSINT Profiling Agent")
 st.write("Enter the details below. The AI will scour the web, cross-reference data, and build an investment profile.")
 
 name = st.text_input("Full Name (Required)")
@@ -16,7 +16,6 @@ if st.button("Start Search & Profile"):
     else:
         with st.spinner("Agent is running..."):
             try:
-                # Broadened queries without strict quotes
                 queries = [
                     f'{name} {phone if phone else ""} {email if email else ""}',
                     f'{name} LinkedIn OR Business OR Director'
@@ -24,7 +23,6 @@ if st.button("Start Search & Profile"):
                 
                 st.info("📡 Step 1: Searching the web for public records...")
                 
-                # Using 'lite' backend to bypass cloud IP blocks
                 ddgs = DDGS()
                 search_results = []
                 for q in queries:
@@ -40,14 +38,9 @@ if st.button("Start Search & Profile"):
                     st.warning("No public data found on the web for this person. Try adding their city or company name next to their name.")
                     st.stop()
 
-                st.info("🧠 Step 2: Web data found! Feeding into NVIDIA AI for analysis...")
+                st.info("🧠 Step 2: Web data found! Feeding into Gemini AI for analysis...")
 
-                # SECURITY: Pulls the API key safely from your hidden Streamlit Vault
-                client = OpenAI(
-                    base_url="https://integrate.api.nvidia.com/v1",
-                    api_key=st.secrets["NVIDIA_API_KEY"]
-                )
-                
+                client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
                 prompt = f"""
                 You are an expert OSINT investigator and financial profiler.
                 Target Name: {name}
@@ -66,15 +59,14 @@ if st.button("Start Search & Profile"):
                 Format the output beautifully in Markdown.
                 """
                 
-                # Using Llama 3.2 which is currently active on NVIDIA NIM
-                response = client.chat.completions.create(
-                    model="meta/llama-3.2-3b-instruct",
-                    messages=[{"role": "user", "content": prompt}],
-                    timeout=30 
+                # Gemini models do not constantly deprecate like NVIDIA
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=prompt
                 )
                 
                 st.success("✅ Analysis Complete!")
-                st.markdown(response.choices[0].message.content)
+                st.markdown(response.text)
                 
                 with st.expander("View Raw Web Data Sources"):
                     st.text(formatted_results)
