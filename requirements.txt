@@ -1,3 +1,2 @@
 streamlit
-duckduckgo-search
 google-genai
