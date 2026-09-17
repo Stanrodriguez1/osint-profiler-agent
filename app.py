@@ -1,10 +1,9 @@
 import streamlit as st
 from google import genai
-from google.genai import types
 
 st.set_page_config(page_title="OSINT Profiler", page_icon="🕵️")
-st.title("🕵️ Customer OSINT Profiling Agent")
-st.write("Enter the details below. The AI will natively search Google, cross-reference data, and build an investment profile.")
+st.title("🕵️ Customer OSINT Profiling Agent (Free Tier)")
+st.write("Enter the details below. The AI will build an investment profile based on its extensive internal knowledge base.")
 
 name = st.text_input("Full Name (Required)")
 phone = st.text_input("Phone Number (Optional)")
@@ -16,7 +15,7 @@ if st.button("Start Search & Profile"):
     else:
         with st.spinner("Agent is running..."):
             try:
-                st.info("🧠 Agent is directly searching Google and analyzing data...")
+                st.info("🧠 Analyzing customer data...")
 
                 # Connect to Gemini securely
                 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
@@ -28,22 +27,18 @@ if st.button("Start Search & Profile"):
                 Target Email: {email}
                 
                 Task:
-                1. Use your built-in Google Search tool to search the live web for this person (check LinkedIn, company pages, news, etc.).
-                2. Identify their most likely professional profile.
-                3. Estimate their Financial/Investment Capability (High/Medium/Low) based on their career.
-                4. Extract ANY contact info (emails, phone numbers, company websites) you find.
-                5. CITE YOUR SOURCES. Provide URLs to the websites where you found the information.
+                1. Search your internal knowledge base for any information on this person.
+                2. Identify their most likely professional profile and industry.
+                3. Estimate their Financial/Investment Capability (High/Medium/Low) based on their likely career.
+                4. Note: If the person is not famous or public enough to be in your training data, provide a general profile of what a person with their name/background in their region might look like financially, but explicitly state that you are making an educated guess due to a lack of public footprint.
                 
-                Format the output beautifully in Markdown. If you cannot find any public data on Google, explain that they have no digital footprint.
+                Format the output beautifully in Markdown.
                 """
                 
-                # We turn on the powerful "google_search" tool here!
+                # Using Gemini 3.6 Flash without the gated search tool
                 response = client.models.generate_content(
                     model='gemini-3.6-flash',
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        tools=[{"google_search": {}}]
-                    )
+                    contents=prompt
                 )
                 
                 st.success("✅ Analysis Complete!")
